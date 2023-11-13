@@ -312,11 +312,12 @@ const isLoggedIn = async (req, res, next) => {
           user: currentUser,
         },
       });
+      
     }
   } catch (err) {
-    return next(new APPError(err.message, 400));
+    next(new APPError(err.message, 400));
   }
-  next();
+  
 };
 
 module.exports = {

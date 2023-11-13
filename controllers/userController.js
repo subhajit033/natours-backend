@@ -2,6 +2,7 @@ const APPError = require('../utils/appError');
 const multer = require('multer');
 const sharp = require('sharp');
 const User = require('../models/userModel');
+const { uploadOnCloud } = require('../utils/cloudinary');
 const {
   deleteOne,
   updateOne,
@@ -34,20 +35,34 @@ const multerFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  dest: `../../natours/client/src/assets/users`,
+  dest: `./public/temp`,
   storage: multerStorage,
   fileFilter: multerFilter,
 });
 const uploadUsersPhoto = upload.single('photo');
 
-const resizeUserPhoto = (req, res, next) => {
+const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
-  sharp(req.file.buffer)
+  await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
-    .toFile(`../../natours/client/src/assets/users/${req.file.filename}`);
+    .toFile(`./public/temp/${req.file.filename}`);
+  next();
+};
+
+const uploadUserImg = async (req, res, next) => {
+  try {
+    const response = await uploadOnCloud(req.file.filename);
+    console.log(response);
+    if (!response) {
+      return next(new APPError('Error while uploading photo on cloud', 400));
+    }
+    req.body.photo = response;
+  } catch (err) {
+    return next(new APPError(err.message, 400));
+  }
   next();
 };
 
@@ -76,7 +91,7 @@ const updateMe = async (req, res, next) => {
    */
   console.log(req.file);
   console.log(req.body);
-  req.body.photo = req.file.filename;
+ 
   try {
     const filteredBody = filterObj(req.body, 'name', 'email', 'photo');
     if (req.body.password || req.body.passwordconfirm)
@@ -126,4 +141,5 @@ module.exports = {
   getMe,
   uploadUsersPhoto,
   resizeUserPhoto,
+  uploadUserImg,
 };
