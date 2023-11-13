@@ -1,5 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const path = require('path');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -7,24 +8,28 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloud = async (localFilePath) => {
+const uploadOnCloud = async (localFileName) => {
   try {
-    if (!localFilePath) return null;
+    if (!localFileName) return null;
     //upload the file on clodinary
     //clodinary is alreday installed ass v2
-    const response = await cloudinary.uploader.upload(
-      `./public/temp/${localFilePath}`,
-      {
-        resource_type: 'image',
-      }
+    const filePath = path.join(
+      __dirname,
+      '..',
+      'public',
+      'temp',
+      localFileName
     );
+    const response = await cloudinary.uploader.upload(filePath, {
+      resource_type: 'image',
+    });
     //file uploaded successfully
-    fs.unlinkSync(`./public/temp/${localFilePath}`);
+    fs.unlinkSync(filePath);
     console.log('file is uploaded in clodinary ', response.url);
     return response.url;
   } catch (err) {
     console.log(err);
-    fs.unlinkSync(`./public/temp/${localFilePath}`); //remove the localy save tempory file, as the upload operation got failed
+    fs.unlinkSync(filePath); //remove the localy save tempory file, as the upload operation got failed
     return null;
   }
 };

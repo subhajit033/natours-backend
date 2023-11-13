@@ -2,6 +2,7 @@ const APPError = require('../utils/appError');
 const multer = require('multer');
 const sharp = require('sharp');
 const User = require('../models/userModel');
+const path = require('path');
 const { uploadOnCloud } = require('../utils/cloudinary');
 const {
   deleteOne,
@@ -44,11 +45,12 @@ const uploadUsersPhoto = upload.single('photo');
 const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+  const outputPath = path.join(__dirname, '..', 'public', 'temp', req.file.filename);
   await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
-    .toFile(`./public/temp/${req.file.filename}`);
+    .toFile(outputPath);
   next();
 };
 
@@ -91,7 +93,7 @@ const updateMe = async (req, res, next) => {
    */
   console.log(req.file);
   console.log(req.body);
- 
+
   try {
     const filteredBody = filterObj(req.body, 'name', 'email', 'photo');
     if (req.body.password || req.body.passwordconfirm)
