@@ -36,7 +36,7 @@ const multerFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  dest: `./public/temp`,
+  // dest: `./public/temp`,
   storage: multerStorage,
   fileFilter: multerFilter,
 });
@@ -45,7 +45,13 @@ const uploadUsersPhoto = upload.single('photo');
 const resizeUserPhoto = async (req, res, next) => {
   if (!req.file) return next();
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
-  const outputPath = path.join(__dirname, '..', 'public', 'temp', req.file.filename);
+  const outputPath = path.join(
+    __dirname,
+    '..',
+    'public',
+    'temp',
+    req.file.filename
+  );
   await sharp(req.file.buffer)
     .resize(500, 500)
     .toFormat('jpeg')
@@ -55,6 +61,9 @@ const resizeUserPhoto = async (req, res, next) => {
 };
 
 const uploadUserImg = async (req, res, next) => {
+  //error i am getting because because, i am neglecting the prev middleware, if there is no file , but here we are trying to access
+  //it req.file.filename
+  if (!req.file) return next();
   try {
     const response = await uploadOnCloud(req.file.filename);
     console.log(response);
