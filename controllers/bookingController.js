@@ -3,6 +3,7 @@ const APPError = require('../utils/appError');
 const stripe = require('stripe')(process.env.STRIPE_SEC_KEY);
 const { createOne } = require('../controllers/handlerFactory');
 const Booking = require('../models/bookingModel');
+const User = require('../models/userModel');
 const getCheckOutSession = async (req, res, next) => {
   /**
    * 1) get currently booked tour
@@ -25,6 +26,8 @@ const getCheckOutSession = async (req, res, next) => {
         //   currency: 'INR',
         //   quantity: 1,
         // },
+
+        //new in stripe
         {
           price_data: {
             currency: 'INR',
@@ -43,11 +46,11 @@ const getCheckOutSession = async (req, res, next) => {
       mode: 'payment',
       payment_method_types: ['card'],
       //not a secure way, in deployed websoute we can integrate stripe webkooks for payment success
-      success_url: `http://localhost:5173?tour=${tour._id}?user=${req.user.id}?price=${tour.price}`,
+      success_url: `http://localhost:5173`,
       cancel_url: `http://localhost:5173/${req.params.tourSlug}`,
       //customer_name: req.user.name,
       customer_email: req.user.email,
-      client_reference_id: req.user.id,
+      client_reference_id: tour._id,
     });
     res.status(200).json({
       status: 'success',
@@ -58,7 +61,7 @@ const getCheckOutSession = async (req, res, next) => {
   }
 };
 
-const setTourUser = (req, res ,next)=>{
+const setTourUser = (req, res, next) => {
   const { tour, user, price } = req.query;
   if (!tour || !user || !price) {
     return next();
@@ -67,8 +70,36 @@ const setTourUser = (req, res ,next)=>{
   req.body.user = user;
   req.body.price = price;
   next();
-}
-const createBookingCheckout = createOne(Booking);
+};
+const createBookingCheckout = async (sessionData) => {
+  //all the data required during checkout will be received here after successful payment
+  const tour = sessionData.client_reference_id;
+  const user = (await User.findOne({ email: sessionData.customer_email })).id;
+  const price = sessionData.line_items[0].price_data.unit_amount / 100;
+  await Booking.create({ tour, user, price });
+};
 
+const webhookCheckout = async (req, res, next) => {
+  const endpointSecret = process.env.WEBHOOK_SECRET;
+  const sig = req.headers['stripe-signature'];
+  //this body need to be in raw form
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    return res.status(400).send(`webhook error - ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    createBookingCheckout(event?.data?.object);
+  }
+  res.status(200).json({
+    received: true,
+  });
+};
 
-module.exports = { getCheckOutSession, setTourUser, createBookingCheckout };
+module.exports = {
+  getCheckOutSession,
+  setTourUser,
+  createBookingCheckout,
+  webhookCheckout,
+};

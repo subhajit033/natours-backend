@@ -11,10 +11,10 @@ const cookieParser = require('cookie-parser');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
-
 const bookingRouter = require('./routes/bookingRoutes');
 const APPError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorControllers');
+const { webhookCheckout } = require('./controllers/bookingController');
 const app = express();
 
 //GLOBAL MIDDLEWARE
@@ -42,6 +42,13 @@ app.set('views', path.join(__dirname, 'views'));
 
 //limit req from same ip
 app.use('/api', limiter);
+
+//stripe api need the raw streamed data , not the json data, thats why we are declaring this before body parser
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  webhookCheckout
+);
 
 //body parser
 app.use(express.json({ limit: '10kb' }));
@@ -81,7 +88,6 @@ app.use(
 //serving static file
 app.use(express.static(`./public`));
 //router middleware
-
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);

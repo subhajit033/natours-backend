@@ -4,6 +4,6 @@ const {getCheckOutSession, setTourUser, createBookingCheckout} = require('../con
 const router = express.Router();
 
 router.get('/checkout-session/:tourSlug', protect, getCheckOutSession);
-router.get('/createBooking', setTourUser, createBookingCheckout);
+router.get('/createBooking',  createBookingCheckout);
 
 module.exports = router;
