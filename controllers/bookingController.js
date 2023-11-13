@@ -50,7 +50,9 @@ const getCheckOutSession = async (req, res, next) => {
       cancel_url: `http://localhost:5173/${req.params.tourSlug}`,
       //customer_name: req.user.name,
       customer_email: req.user.email,
-      client_reference_id: tour._id,
+      metadata: {
+        client_reference_id: tour._id,
+      },
     });
     res.status(200).json({
       status: 'success',
@@ -73,9 +75,9 @@ const setTourUser = (req, res, next) => {
 };
 const createBookingCheckout = async (sessionData) => {
   //all the data required during checkout will be received here after successful payment
-  const tour = sessionData.client_reference_id;
+  const tour = sessionData.metadata.client_reference_id;
   const user = (await User.findOne({ email: sessionData.customer_email })).id;
-  const price = sessionData.line_items[0].price_data.unit_amount / 100;
+  const price = sessionData.amount_total / 100;
   await Booking.create({ tour, user, price });
 };
 
