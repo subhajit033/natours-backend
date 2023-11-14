@@ -12,7 +12,8 @@ const {
   getMe,
   uploadUsersPhoto,
   resizeUserPhoto,
-  uploadUserImg
+  uploadUserImg,
+  getBookedTours
 } = require('../controllers/userController');
 const {
   signup,
@@ -25,8 +26,6 @@ const {
   isLoggedIn,
   logOut,
 } = require('../controllers/authController');
-
-
 
 router.post('/signup', signup);
 router.post('/login', login);
@@ -42,7 +41,14 @@ router.use(protect);
 
 router.patch('/updatePassword', updatePassword);
 router.get('/me', getMe, getSpecificUser);
-router.patch('/updateMe', uploadUsersPhoto, resizeUserPhoto, uploadUserImg,  updateMe);
+router.patch(
+  '/updateMe',
+  uploadUsersPhoto,
+  resizeUserPhoto,
+  uploadUserImg,
+  updateMe
+);
+router.get('/myTours', getBookedTours);
 router.delete('/deleteMe', deleteMe);
 
 //rest format routes

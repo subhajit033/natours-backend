@@ -50,6 +50,7 @@ const getCheckOutSession = async (req, res, next) => {
       cancel_url: `http://localhost:5173/${req.params.tourSlug}`,
       //customer_name: req.user.name,
       customer_email: req.user.email,
+      //during accessing single doc id is always id not _id
       client_reference_id: tour.id,
       metadata: {
         tourId: tour.id,

@@ -2,6 +2,7 @@ const APPError = require('../utils/appError');
 const multer = require('multer');
 const sharp = require('sharp');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 const path = require('path');
 const { uploadOnCloud } = require('../utils/cloudinary');
 const {
@@ -40,6 +41,7 @@ const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
 });
+//this photo is the key of postman , from where the file is coming from
 const uploadUsersPhoto = upload.single('photo');
 
 const resizeUserPhoto = async (req, res, next) => {
@@ -63,6 +65,8 @@ const resizeUserPhoto = async (req, res, next) => {
 const uploadUserImg = async (req, res, next) => {
   //error i am getting because because, i am neglecting the prev middleware, if there is no file , but here we are trying to access
   //it req.file.filename
+  //also i have set useState file = "" initialy so thst is converting to link, thats why getting error
+  //solved:- initialy put it null
   if (!req.file) return next();
   try {
     const response = await uploadOnCloud(req.file.filename);
@@ -141,6 +145,49 @@ const deleteMe = async (req, res, next) => {
     data: null,
   });
 };
+
+const getBookedTours = async (req, res, next) => {
+  try {
+    const stats = await Booking.aggregate([
+      {
+        $match: { user: req.user._id },
+      },
+      {
+        $lookup: {
+          from: 'tours', // Assuming the name of the tours collection is 'tours'
+          localField: 'tour',
+          foreignField: '_id',
+          as: 'tourDetails',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users', // Assuming the name of the users collection is 'users'
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails',
+        },
+      },
+
+      {
+        $project: {
+          'userDetails.name': 1, // Include only the 'name' field from the 'users' collection
+          'tourDetails.name': 1, // Include the 'tour' field
+          'tourDetails.imageCover': 1,
+          price: 1, // Include the 'price' field
+          bookedAt: 1, // Include the 'bookedAt' field
+          paid: 1, // Include the 'paid' field
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      bookedTours: stats,
+    });
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
 module.exports = {
   getAllUsers,
   createUser,
@@ -153,4 +200,5 @@ module.exports = {
   uploadUsersPhoto,
   resizeUserPhoto,
   uploadUserImg,
+  getBookedTours,
 };
