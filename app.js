@@ -21,7 +21,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  credentials: true
+}));
 
 app.enable('trust proxy');
 
@@ -29,7 +32,16 @@ app.enable('trust proxy');
 app.options('*', cors());
 
 //set securtity http header
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://js.stripe.com'],
+      scriptSrc: ["'self'", 'https://api.mapbox.com'],
+      imgSrc: ["'self'", 'https://i.ibb.co', 'http://res.cloudinary.com'],
+    },
+  })
+);
 
 //limit req from same ip
 
