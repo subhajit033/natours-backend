@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -19,29 +18,20 @@ const app = express();
 
 //GLOBAL MIDDLEWARE
 if (process.env.NODE_ENV === 'development') {
-  app.use(cors());
   app.use(morgan('dev'));
 }
 
+app.use(cors());
+
+app.enable('trust proxy');
+
+//this is special case for performing complex operation like , delete , put , and routes which are sending cookies
+app.options('*', cors());
+
 //set securtity http header
 app.use(helmet());
-app.use((req, res, next) => {
-  console.log(`${__dirname}/../client`);
-  next();
-});
-const limiter = rateLimit({
-  max: 100,
-  windowMS: 60 * 60 * 1000,
-  message: 'too many request from this ip, please try again in an hour',
-});
-
-//views
-
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
 
 //limit req from same ip
-app.use('/api', limiter);
 
 //stripe api need the raw streamed data , not the json data, thats why we are declaring this before body parser
 app.post(
@@ -58,7 +48,6 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   req.time = new Date();
   // console.log(req.headers);
-
   next();
 });
 
@@ -94,7 +83,17 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
 
+const clientDir = path.join(__dirname, 'client', 'dist');
+
+app.use(express.static(clientDir));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDir, 'index.html'));
+});
+
 //console.log(x);
+
+//these are unhandled route sohold be put after all routes
 app.all('*', (req, res, next) => {
   next(new APPError(`Cannot find ${req.originalUrl} on this server`, 404));
 });
