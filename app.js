@@ -21,10 +21,12 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(cors({
-  origin: '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: '*',
+    credentials: true,
+  })
+);
 
 app.enable('trust proxy');
 
@@ -35,9 +37,15 @@ app.options('*', cors());
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
+      'worker-src': ["'self'", 'blob:'],
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://js.stripe.com'],
-      scriptSrc: ["'self'", 'https://api.mapbox.com'],
+      scriptSrc: [
+        "'self'",
+        'https://js.stripe.com',
+        'https://api.mapbox.com',
+        "'unsafe-inline'",
+      ],
+
       imgSrc: ["'self'", 'https://i.ibb.co', 'http://res.cloudinary.com'],
     },
   })
