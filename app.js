@@ -45,6 +45,7 @@ app.use(
         'https://api.mapbox.com',
         "'unsafe-inline'",
       ],
+      connectSrc: ["'self'", 'blob:', 'https://api.mapbox.com'],
 
       imgSrc: ["'self'", 'https://i.ibb.co', 'http://res.cloudinary.com'],
     },
