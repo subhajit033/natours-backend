@@ -22,6 +22,19 @@ const UserDetails = () => {
       setEmail(userData?.email);
     }
   }, [userData]);
+  const avatar = document.getElementById('user-avatar');
+
+  useEffect(() => {
+    if (file) {
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        
+        avatar.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [file]);
 
   const handleSubmit = async (e) => {
     setLoading(true);
@@ -156,6 +169,7 @@ const UserDetails = () => {
           </div>
           <div className='form__group form__photo-upload'>
             <img
+              id='user-avatar'
               className='form__user-photo'
               src={
                 userData?.photo
