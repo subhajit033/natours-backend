@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
-
+import Loader from '../Loader/Loader';
 const ProtectedRoute = () => {
   const isAuthenticated = useSelector((store) => store.auth.isAuthenticated);
-  const [shouldRender, setshouldRender] = useState(false);
-  useEffect(() => {
-    if (isAuthenticated) {
-      setshouldRender(true);
-    }
-  }, [isAuthenticated]);
-  console.log('isAuthenticated ' + isAuthenticated);
+  if (isAuthenticated === null) {
+    return <Loader />;
+  }
 
   return isAuthenticated ? <Outlet /> : <Navigate to='/login' />;
 };
