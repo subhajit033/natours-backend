@@ -188,6 +188,31 @@ const getBookedTours = async (req, res, next) => {
     next(new APPError(err.message, 400));
   }
 };
+
+const getMyReviews = async (req, res, next) => {
+  try {
+    const reviews = await User.findById(req.user.id)
+      .populate({
+        path: 'reviews',
+        //in reviews filed populate tour field
+        populate: {
+          path: 'tour', // Populate both 'tour' and 'user' fields in reviews
+          select: 'name slug', // Select the fields you want for 'tour' and 'user'
+        },
+      })
+      .select('reviews'); // Select only the 'reviews' field from the user document
+
+    res.status(200).json({
+      status: 'success',
+      data:{
+        reviews,
+      }
+    });
+  } catch (err) {
+    next(new APPError(err.message, 400));
+  }
+};
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -201,4 +226,5 @@ module.exports = {
   resizeUserPhoto,
   uploadUserImg,
   getBookedTours,
+  getMyReviews,
 };

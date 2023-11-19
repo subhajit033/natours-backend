@@ -5,7 +5,7 @@ const TourReviews = ({reviews}) => {
     <section className='section-reviews'>
       <div className='reviews'>
       {
-        reviews?.map((review) => <ReviewCard key={review._id} {...review} />)
+        reviews?.map((review) => <ReviewCard key={review._id} {...review} myReviews={false} />)
       }
       </div>
     </section>

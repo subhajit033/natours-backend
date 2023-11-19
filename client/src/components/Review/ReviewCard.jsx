@@ -1,16 +1,16 @@
 import { iconsSvg } from '../../assets/image.js';
 
-const ReviewCard = ({ user, review, rating }) => {
+const ReviewCard = ({ user, review, rating, myReviews, tour }) => {
   return (
     <div className='reviews__card'>
-      <div className='reviews__avatar'>
+      {!myReviews && <div className='reviews__avatar'>
         <img
           src={user?.photo}
           alt='Jim Brown'
           className='reviews__avatar-img'
         />
         <h6 className='reviews__user'>{user?.name}</h6>
-      </div>
+      </div>}
       <p className='reviews__text'>{review}</p>
       <div className='reviews__rating'>
         {[1, 2, 3, 4, 5].map((num, i) => {
@@ -26,6 +26,7 @@ const ReviewCard = ({ user, review, rating }) => {
           );
         })}
       </div>
+      {myReviews && <h2>{tour.name}</h2>}
     </div>
   );
 };

@@ -4,59 +4,71 @@ const APPError = require('../utils/appError');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { Schema } = mongoose;
-const userSchema = new Schema({
-  name: {
-    type: String,
-    required: [true, 'A user must have a name'],
-  },
-  email: {
-    type: String,
-    required: [true, 'please enter a email address'],
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, 'please provide a valid email address'],
-  },
-  photo: {
-    type: String,
-  },
-  role: {
-    type: String,
-    enum: {
-      values: ['user', 'guide', 'lead-guide', 'admin'],
-      message: 'user role should be user or guide or admin',
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'A user must have a name'],
     },
-    default: 'user',
-  },
-  password: {
-    type: String,
-    required: [true, 'password cannot be empty'],
-    minlength: [8, 'password must contain minimum 8 character'],
-    //to hide password in every req
-    select: false,
-  },
-  passwordconfirm: {
-    type: String,
-    required: [true, 'please confirm your password'],
-    validate: {
-      //if become false then it will show error message
-      //This will only works on SAVE or CREATE !! not work for findOneandUpdate this type of method
-      validator: function (pass) {
-        return pass === this.password;
+    email: {
+      type: String,
+      required: [true, 'please enter a email address'],
+      unique: true,
+      lowercase: true,
+      validate: [validator.isEmail, 'please provide a valid email address'],
+    },
+    photo: {
+      type: String,
+    },
+    role: {
+      type: String,
+      enum: {
+        values: ['user', 'guide', 'lead-guide', 'admin'],
+        message: 'user role should be user or guide or admin',
       },
-      message: 'password does not match , try again',
+      default: 'user',
     },
+    password: {
+      type: String,
+      required: [true, 'password cannot be empty'],
+      minlength: [8, 'password must contain minimum 8 character'],
+      //to hide password in every req
+      select: false,
+    },
+    passwordconfirm: {
+      type: String,
+      required: [true, 'please confirm your password'],
+      validate: {
+        //if become false then it will show error message
+        //This will only works on SAVE or CREATE !! not work for findOneandUpdate this type of method
+        validator: function (pass) {
+          return pass === this.password;
+        },
+        message: 'password does not match , try again',
+      },
+    },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
-  active: {
-    type: Boolean,
-    default: true,
-    select: false,
-  },
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 //pre save middleware -> a pre middleware on save(runs before save a document)
 //we are using this keyword here so we can't able to use arrow function
+
+userSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'user',
+  localField: '_id',
+});
 
 userSchema.pre(/^find/, function (next) {
   //this point to the

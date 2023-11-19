@@ -20,7 +20,9 @@ const getAllTours = getAll(Tour);
 
 const getSpecificTours = getOne(Tour, {
   path: 'reviews',
-  select: '-tour',
+  populate: {
+    path: 'user',
+  },
 });
 
 const createNewTour = createOne(Tour);

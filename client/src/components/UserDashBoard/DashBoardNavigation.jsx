@@ -23,12 +23,12 @@ const DashBoardNavigation = () => {
           </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/me/my-reviews'>
             <svg>
               <use xlinkHref={`${iconsSvg}#icon-star`} />
             </svg>
             My reviews
-          </a>
+          </Link>
         </li>
         <li>
           <a href='#'>

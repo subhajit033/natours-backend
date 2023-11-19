@@ -10,7 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './Layout/Layout';
 import axios from 'axios';
-import { api_url } from './utils/helper';
+import MyReview from './components/Review/MyReview';
 import { useDispatch } from 'react-redux';
 import { authentication } from './redux/authSlice';
 import { loadUserDetails } from './redux/userDetails';
@@ -86,6 +86,10 @@ const router = createBrowserRouter([
               {
                 path: 'my-tours',
                 element: <Booking />,
+              },
+              {
+                path: 'my-reviews',
+                element: <MyReview />,
               },
             ],
           },
