@@ -46,8 +46,8 @@ const getCheckOutSession = async (req, res, next) => {
       mode: 'payment',
       payment_method_types: ['card'],
       //not a secure way, in deployed websoute we can integrate stripe webkooks for payment success
-      success_url: `http://localhost:5173`,
-      cancel_url: `http://localhost:5173/${req.params.tourSlug}`,
+      success_url: `${req.protocol}://${req.get('host')}`,
+      cancel_url: `${req.protocol}://${req.get('host')}/${req.params.tourSlug}`,
       //customer_name: req.user.name,
       customer_email: req.user.email,
       //during accessing single doc id is always id not _id

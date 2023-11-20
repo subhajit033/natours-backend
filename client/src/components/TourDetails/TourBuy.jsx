@@ -19,13 +19,19 @@ const TourBuy = ({ images, duration, tourSlug }) => {
         'pk_test_51OBHZtSI41yQ1g5YyAiPqlyx0tDza2PH2MUt0JKIXH5EKoLquT1hxPy8FaD8emO3N2basTfcVf6brHUt5oeTbhxs00CxtqumXH'
       );
       const session = await axios.get(
-        `/api/v1/bookings/checkout-session/${tourSlug}`, {withCredentials: true}
+        `/api/v1/bookings/checkout-session/${tourSlug}`,
+        { withCredentials: true }
       );
+      console.log(session);
 
-      await stripe.redirectToCheckout({
-        sessionId: session.session.id,
-      });
-      
+      try {
+        await stripe.redirectToCheckout({
+          sessionId: session.data.session.id,
+        });
+      } catch (err) {
+        console.log('error in checkout '+ err);
+      }
+
       setLoading(false);
     } catch (err) {
       setLoading(false);

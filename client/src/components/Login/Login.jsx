@@ -90,7 +90,12 @@ const Login = () => {
           </div>
           <div className='form__group'>
             <button className='btn btn--green'>Login</button>
-            <Link style={{fontSize: '1.3rem', marginLeft: '2rem'}} to='/signup'>New to Natours ? create a new account</Link>
+            <Link
+              style={{ fontSize: '1.3rem', marginLeft: '2rem' }}
+              to='/signup'
+            >
+              New to Natours ? create a new account
+            </Link>
           </div>
         </form>
       </div>
