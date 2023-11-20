@@ -23,13 +23,14 @@ const TourBuy = ({ images, duration, tourSlug }) => {
         { withCredentials: true }
       );
       console.log(session);
+      console.log(session.data.session.id);
 
       try {
         await stripe.redirectToCheckout({
           sessionId: session.data.session.id,
         });
       } catch (err) {
-        console.log('error in checkout '+ err);
+        console.log('error in checkout ' + err);
       }
 
       setLoading(false);
